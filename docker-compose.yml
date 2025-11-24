@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mtk-app:
+    build: .
+    ports:
+      - "80:80"
+    env_file:
+      - .env  # 🔑 Baca semua variabel dari .env
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - .env  # Baca juga untuk MySQL
+    environment:
+      # Mapping dari .env ke variabel MySQL
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
