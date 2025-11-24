@@ -11,7 +11,7 @@ from functools import wraps
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text as sqltext
-from mtk_model import db, Mtk
+from models import db, Mtk
 from razan import cfg
 app = Flask(
     __name__,

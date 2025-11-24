@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Pengguna - Latihan MTK</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background: #f0f0f0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h2>📊 Statistik Pengguna</h2>
+    <p>Klik nama untuk melihat grafik durasi 7 hari terakhir.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nama Pengguna</th>
+                <th>Sesi Latihan</th>
+                <th>Terakhir Aktif</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for nama, sesi, terakhir in users %}
+            <tr>
+                <td>{{ nama }}</td>
+                <td>{{ sesi }}</td>
+                <td>{{ terakhir }}</td>
+                <td><a href="/mtk/user/{{ nama | urlencode }}">Lihat Chart</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="/mtk">← Kembali ke Latihan</a>
+</body>
+</html>

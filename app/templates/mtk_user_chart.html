@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chart - {{ user_name }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</head>
+<style>
+  #chart {
+    max-width: 1200px;   /* batasi lebar */
+    max-height: 400px;  /* batasi tinggi */
+  }
+  .chart-container {
+    position: relative;
+    height: 400px;      /* tinggi tetap */
+    width: 1200px;       /* lebar tetap */
+  }
+</style>
+<body>
+    <h2>📈 {{ user_name }}</h2>
+    
+    {% if durasi %}
+<div class="chart-container">
+  <canvas id="chart"></canvas>
+</div>
+<script>
+    const durasiData = {{ durasi | tojson }};
+    const statusBenar = {{ status_benar | tojson }};
+    
+    // Tentukan warna titik: hijau jika benar, merah jika salah
+    const pointColors = statusBenar.map(benar => 
+        benar ? 'rgba(40, 167, 69, 1)' : 'rgba(220, 53, 69, 1)'
+    );
+
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels | tojson }},
+            datasets: [{
+                label: 'Durasi (detik)',
+                data: durasiData,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: pointColors,   // 🔴🟢 Warna titik per soal
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        // Opsional: tambahkan keterangan warna
+                        generateLabels: function(chart) {
+                            return [
+                                {
+                                    text: 'Benar',
+                                    fillStyle: 'rgba(40, 167, 69, 1)',
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    pointStyle: 'circle'
+                                },
+                                {
+                                    text: 'Salah',
+                                    fillStyle: 'rgba(220, 53, 69, 1)',
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    pointStyle: 'circle'
+                                }
+                            ];
+                        }
+                    }
+                },
+                tooltip: {
+                callbacks: {
+                    afterLabel: function(context) {
+                    const benar = statusBenar[context.dataIndex];
+                    return benar ? '✅ Benar' : '❌ Salah';
+                    }
+                }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Soal' }
+                },
+                y: {
+                    title: { display: true, text: 'Durasi (detik)' },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+    {% else %}
+        <p>❌ Tidak ada data dalam 7 hari terakhir untuk <strong>{{ user_name }}</strong>.</p>
+    {% endif %}
+
+    <br>
+    <a href="/mtk/users">← Kembali ke Daftar Pengguna</a>
+</body>
+</html>

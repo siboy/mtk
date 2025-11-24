@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latihan Matematika</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+.feedback-inline {
+    font-weight: bold;
+    font-size: 28px; /* sesuaikan dengan ukuran soal */
+    min-width: 120px; /* hindari loncat saat muncul */
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feedback-inline.show {
+    opacity: 1;
+}
+
+/* Warna feedback */
+.feedback-inline.benar { color: #155724; }
+.feedback-inline.salah { color: #721c24; }
+</style>
+
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9f9f9; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .config, .latihan, .hasil { margin: 20px 0; }
+        input, select, button { padding: 8px; margin: 5px; }
+        .benar { background: #d4edda; color: #155724; }
+        .salah { background: #f8d7da; color: #721c24; }
+        .animasi {
+            position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%);
+            font-size: 60px; 
+            pointer-events: none; 
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        #kembang-api::before { content: "🎆"; }
+        #roket::before { content: "🚀💥"; }
+        #transparan { 
+            opacity: 0.3 !important; 
+            font-size: 30px; 
+        }
+        .soal-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .soal-teks {
+            font-weight: bold;
+            color: #1a1a1a;
+            text-align: center;
+            line-height: 1.3;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px 10px;
+            width: 94%;
+            max-width: 800px;
+            word-wrap: break-word;
+            word-break: break-all;
+            font-size: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px; /* jarak antara soal dan feedback */
+        }
+        @media (max-width: 992px) { .soal-teks { font-size: 86px; } }
+        @media (max-width: 768px) { .soal-teks { font-size: 78px; } }
+        @media (max-width: 600px) { .soal-teks { font-size: 70px; } }
+        @media (max-width: 480px) { .soal-teks { font-size: 64px; } }
+        @media (max-width: 360px) { 
+            .soal-teks { 
+                font-size: 58px; 
+                padding: 12px 6px; 
+            } 
+        }
+        #jawaban-input {
+            font-size: 24px;
+            padding: 12px;
+            text-align: center;
+            width: 120px;
+            margin: 10px auto;
+            display: block;
+            border: 2px solid #4e73df;
+            border-radius: 10px;
+        }
+        button[type="button"] {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 800px;
+            height: 350px;
+            margin: 20px auto;
+        }
+        .stat-durasi {
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .stat-durasi div {
+            background: #e9ecef; 
+            padding: 4px; 
+            margin: 2px 0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+{% if step == 'config' %}
+<h2>Latihan Matematika - Setup</h2>
+<form method="post">
+    <div class="config">
+        <label>Nama: <input type="text" name="nama_user" value="ratih" required></label><br>
+        <label>
+            Mode:
+            <select name="mode" onchange="toggleOperasi()">
+                <option value="random">Random ( + / - / × )</option>
+                <option value="add_sub" selected>Penjumlahan & Pengurangan</option>
+                <option value="add_div">Penjumlahan & Pembagian</option>
+                <option value="multi_div">Perkalian & Pembagian</option>
+                <option value="choice">Pilih Operasi</option>
+            </select>
+        </label>
+        <label>Batas angka pertama (A): 
+            <input type="number" name="batas_a" value="12" min="1" max="100" required>
+        </label>
+        <label>Batas angka kedua (B): 
+            <input type="number" name="batas_b" value="2" min="1" max="100" required>
+        </label>
+        <br>
+
+        <div id="opsi-operasi" style="display:none;">
+            <label>
+                Operasi:
+                <select name="operasi">
+                    <option value="+" selected>Penjumlahan (+)</option>
+                    <option value="-">Pengurangan (-)</option>
+                    <option value="*">Perkalian (×)</option>
+                </select>
+            </label><br>
+        </div>
+        <button type="submit">Mulai Latihan</button>
+    </div>
+</form>
+<!-- Statistik 7 Hari Terakhir (Preview) -->
+<h3>Preview: Durasi Menjawab 7 Hari Terakhir ({{ session.get('nama_user', 'Anda') }})</h3>
+{% if durasi_7hari_preview %}
+<div style="width:100%; max-width:800px; height:300px; margin:20px auto;">
+    <canvas id="chart7Hari"></canvas>
+</div>
+<script>
+    const durasiData = {{ durasi_7hari_preview | tojson }};
+    const statusBenar = {{ status_7hari_preview | tojson }};
+
+    const pointColors = statusBenar.map(benar => 
+        benar ? 'rgba(40, 167, 69, 1)' : 'rgba(220, 53, 69, 1)'
+    );
+
+    const ctx = document.getElementById('chart7Hari').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: durasiData.length}, (_, i) => `Soal ${i + 1}`),
+            datasets: [{
+                label: 'Durasi per Soal (7 hari terakhir)',
+                data: durasiData,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: pointColors,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        generateLabels: function(chart) {
+                            return [
+                                {
+                                    text: 'Benar',
+                                    fillStyle: 'rgba(40, 167, 69, 1)',
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    pointStyle: 'circle'
+                                },
+                                {
+                                    text: 'Salah',
+                                    fillStyle: 'rgba(220, 53, 69, 1)',
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    pointStyle: 'circle'
+                                }
+                            ];
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            label += context.parsed.y + ' detik';
+                            if (context.parsed.y > 30) {
+                                label += ' ⚠️ (terlalu lama)';
+                            }
+                            return label;
+                        },
+                        afterLabel: function(context) {
+                            const benar = statusBenar[context.dataIndex];
+                            return benar ? '✅ Benar' : '❌ Salah';
+                        }
+                    }
+                },
+            },
+            scales: {
+                x: { title: { display: true, text: 'Soal' } },
+                y: { title: { display: true, text: 'Durasi (detik)' }, beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% else %}
+    <p>Belum ada data latihan dalam 7 hari terakhir.</p>
+{% endif %}
+
+<script>
+function toggleOperasi() {
+    const mode = document.querySelector('select[name="mode"]').value;
+    document.getElementById('opsi-operasi').style.display = (mode === 'choice') ? 'block' : 'none';
+}
+</script>
+
+{% elif step == 'latihan' %}
+<h2>Latihan Matematika</h2>
+<div class="soal-container">
+    <div class="soal-teks">
+        <span id="soal-teks">{{ soal }} = ?</span>
+        <span id="feedback-inline" class="feedback-inline"></span>
+    </div>
+</div>
+<form id="form-soal">
+    <input type="text" name="jawaban" id="jawaban-input" placeholder="Jawaban Anda" autofocus>
+    <input type="hidden" name="client_duration" id="client-duration">
+    <button type="button" onclick="selesai()">Selesai</button>
+</form>
+<div id="feedback"></div>
+<div id="kembang-api" class="animasi"></div>
+<div id="roket" class="animasi"></div>
+<div id="transparan" class="animasi">✔️</div>
+
+<!-- 🔹 DEFINISI SUARA & FUNGSI UCAP mtk_latihan.js -->
+<script>
+const SUARA_SALAH = [
+    "Aduh, salah nih!",
+    "Waduh, belum bener!",
+    "Ah, coba lagi yuk!",
+    "Kurang tepat, deh!",
+    "Sayang, jawabannya beda!"
+];
+
+const SUARA_BENAR_10 = [
+    "Hore! Keren banget!",
+    "Mantap! Terus semangat!",
+    "Kamu jago, ya!",
+    "Dikit lagi, ayo!",
+    "Keren! Lanjut terus!"
+];
+
+function ucapkan(teks) {
+    if (!('speechSynthesis' in window)) return;
+
+    const utterance = new SpeechSynthesisUtterance(teks);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    let voices = speechSynthesis.getVoices();
+    let voiceIndonesia = null;
+
+    for (let voice of voices) {
+        if (voice.lang === 'id-ID' || voice.lang.startsWith('id') || 
+            voice.name.toLowerCase().includes('indonesian') ||
+            voice.name.toLowerCase().includes('indonesia')) {
+            voiceIndonesia = voice;
+            break;
+        }
+    }
+
+    if (!voiceIndonesia) {
+        voiceIndonesia = voices.find(v => v.lang.startsWith('id')) || null;
+    }
+
+    if (voiceIndonesia) {
+        utterance.voice = voiceIndonesia;
+    } else {
+        utterance.lang = 'id-ID';
+    }
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+}
+
+if ('speechSynthesis' in window) {
+    speechSynthesis.addEventListener('voiceschanged', () => {});
+}
+
+// Simpan jawaban di localStorage
+let batchAnswers = JSON.parse(localStorage.getItem('mtk_batch') || '[]');
+
+// Catat waktu saat soal muncul
+const startTime = performance.now();
+const kunciJawaban = {{ kunci_jawaban }}; // Ambil dari template Flask
+
+// Auto-submit setelah input
+const inputJawaban = document.getElementById('jawaban-input');
+let submitTimeout = null;
+
+inputJawaban.addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    if (val.length >= 1 && !isNaN(val)) {
+        if (submitTimeout) clearTimeout(submitTimeout);
+        submitTimeout = setTimeout(() => {
+            const jawaban = parseInt(val);
+            const durasi = Math.round((performance.now() - startTime) / 100) / 10;
+            const benar = (jawaban === kunciJawaban);
+
+            // Simpan ke batch
+            const item = {
+                soal: "{{ soal }}",
+                jawaban_user: jawaban,
+                kunci_jawaban: kunciJawaban,
+                durasi_jawab: durasi,
+                benar: benar,
+                timestamp: Date.now()
+            };
+            batchAnswers.push(item);
+            localStorage.setItem('mtk_batch', JSON.stringify(batchAnswers));
+
+            // Update counter
+            let counter = parseInt(localStorage.getItem('mtk_counter') || '0') + 1;
+            localStorage.setItem('mtk_counter', counter.toString());
+
+            // Tampilkan feedback
+            const feedbackInline = document.getElementById('feedback-inline');
+            feedbackInline.textContent = benar ? '✅ Benar!' : '❌ Salah!';
+            feedbackInline.className = `feedback-inline ${benar ? 'benar' : 'salah'} show`;
+            setTimeout(() => {
+                feedbackInline.classList.remove('show');
+                setTimeout(() => { feedbackInline.textContent = ''; }, 300);
+            }, 1500);
+
+            // Suara
+            if (benar) {
+                if (counter % 10 === 0) {
+                    const suara = SUARA_BENAR_10[Math.floor(Math.random() * SUARA_BENAR_10.length)];
+                    ucapkan(suara);
+                }
+            } else {
+                const suara = SUARA_SALAH[Math.floor(Math.random() * SUARA_SALAH.length)];
+                ucapkan(suara);
+            }
+
+            // Animasi
+            let animasi = null;
+            if (durasi < 1) animasi = 'transparan';
+            else if (durasi >= 3 && durasi <= 5) animasi = 'roket';
+            else if (durasi > 5) animasi = 'kembang-api';
+
+            if (animasi) {
+                const el = document.getElementById(animasi === 'transparan' ? 'transparan' : 
+                           animasi === 'roket' ? 'roket' : 'kembang-api');
+                el.style.opacity = '1';
+                setTimeout(() => { el.style.opacity = '0'; }, 1500);
+            }
+
+            // Redirect ke soal berikutnya
+            setTimeout(() => {
+                window.location.href = '/mtk/latihan';
+            }, 1800);
+        }, 150);
+    }
+});
+
+async function selesai() {
+    if (!confirm('Yakin selesai?')) return;
+    
+    const batch = JSON.parse(localStorage.getItem('mtk_batch') || '[]');
+    console.log("Batch data:", batch); // 🔹 LOG DI CONSOLE
+    
+    if (batch.length === 0) {
+        window.location.href = '/mtk/hasil';
+        return;
+    }
+
+    try {
+        const res = await fetch('/mtk/submit-batch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(batch)
+        });
+        const result = await res.json();
+        console.log("Server response:", result); // 🔹 LOG RESPON
+        
+        localStorage.removeItem('mtk_batch');
+        window.location.href = '/mtk/hasil';
+    } catch (e) {
+        console.error("Submit error:", e); // 🔹 LOG ERROR
+        alert('Gagal kirim data. Coba lagi!');
+    }
+}
+</script>
+
+{% elif step == 'hasil' %}
+<h2>Hasil Latihan - {{ nama_user }}</h2>
+<ul>
+    <li><strong>Total soal:</strong> {{ total }}</li>
+    <li><strong>Benar:</strong> {{ benar }}</li>
+    <li><strong>Salah:</strong> {{ salah }}</li>
+</ul>
+
+{% if salah_list %}
+<h3>Soal yang Salah:</h3>
+<ul>
+{% for soal, kunci in salah_list %}
+    <li>{{ soal }} = <strong>{{ kunci }}</strong></li>
+{% endfor %}
+</ul>
+{% else %}
+<p>🎉 Semua jawaban benar! Tidak ada soal salah.</p>
+{% endif %}
+
+<h3>Grafik Durasi Menjawab per Soal (Sesi Ini)</h3>
+<div class="chart-container">
+    <canvas id="chartSesi"></canvas>
+</div>
+
+<script>
+    const durasiData = {{ durasi_per_soal | tojson }};
+    const statusBenar = {{ status_benar | tojson }};
+    
+    const pointColors = statusBenar.map(benar => 
+        benar ? 'rgba(40, 167, 69, 1)' : 'rgba(220, 53, 69, 1)'
+    );
+
+    const ctx = document.getElementById('chartSesi').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: durasiData.length}, (_, i) => i + 1),
+            datasets: [{
+                label: 'Durasi Jawab (detik)',
+                data: durasiData,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: pointColors,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Nomor Soal' } },
+                y: { title: { display: true, text: 'Durasi (detik)' }, beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+<h3>Statistik Durasi 7 Hari Terakhir ({{ nama_user }})</h3>
+{% if durasi_7hari_global %}
+<div class="stat-durasi">
+    {% for durasi in durasi_7hari_global %}
+    <div>Soal → {{ "%.2f"|format(durasi) }} detik</div>
+    {% endfor %}
+</div>
+{% else %}
+<p>Belum ada data dalam 7 hari terakhir.</p>
+{% endif %}
+
+<br>
+<a href="/mtk"><button>Mulai Latihan Baru</button></a>
+{% endif %}
+
+</body>
+</html>
