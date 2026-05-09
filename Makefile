@@ -778,7 +778,7 @@ update-google-token:
 
 # Docker Compose
 up:
-	docker compose --env-file .env up --build
+	docker compose --env-file .env -f setup/docker-compose.yml up --build
 
 down:
 	docker compose down --remove-orphans
