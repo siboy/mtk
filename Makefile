@@ -1,6 +1,7 @@
 
 export PYTHONPATH := ~/flask:${PYTHONPATH}
 USER := $(shell whoami)
+FILE0=./.env
 FILE1=/home/script/.env
 FILE2=C:/flask/.env
 FILE3=/home/$(USER)/flask/.env
@@ -11,7 +12,10 @@ else
 CHECK_FILE_EXISTS = [ -e $(1) ] && echo yes
 endif
 
-ifeq ($(shell $(call CHECK_FILE_EXISTS,${FILE1})),yes)
+ifeq ($(shell $(call CHECK_FILE_EXISTS,${FILE0})),yes)
+RESULT0=${FILE0} exists.
+include ${FILE0}
+else ifeq ($(shell $(call CHECK_FILE_EXISTS,${FILE1})),yes)
 RESULT1=${FILE1} exists.
 include ${FILE1}
 else ifeq ($(shell $(call CHECK_FILE_EXISTS,${FILE2})),yes)
