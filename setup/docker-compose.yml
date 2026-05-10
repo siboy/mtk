@@ -5,8 +5,16 @@ services:
     build:
       context: ..
       dockerfile: setup/Dockerfile
+    image: mtk-app:latest
     ports:
       - "80:80"
+    environment:
+      - user_databoks=mtk_user
+      - pass_databoks=mtk_password
+      - host_databoks=mysql
+      - port_databoks=3306
+      - database_dev=mtk_db
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - mysql
       - redis
@@ -15,10 +23,10 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: mtk_password
+      MYSQL_DATABASE: mtk_db
+      MYSQL_USER: mtk_user
+      MYSQL_PASSWORD: mtk_password
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped

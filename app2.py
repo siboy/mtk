@@ -2,8 +2,9 @@
 from flask import Flask, Response, jsonify, redirect, make_response, request, url_for, render_template, session, abort, flash, stream_with_context, send_file, abort, g as gprint
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import redis
 
-import io, os, sys, re, random, json, pandas as pd, numpy as np, time, html, uuid, sqlite3, logging
+import io, os, sys, re, random, json, time, html, uuid, sqlite3, logging
 from functools import lru_cache
 from datetime import datetime, timedelta
 import urllib.parse

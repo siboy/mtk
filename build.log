@@ -1,0 +1,136 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 521B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.13-slim
+#2 DONE 2.8s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/library/python:3.13-slim@sha256:d49c1ff87eb98eac346fc250f52925f726eb913c43a92854246dd03c9692ad67
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 3.57kB 0.0s done
+#5 DONE 0.0s
+
+#6 [2/9] WORKDIR /app
+#6 CACHED
+
+#7 [3/9] RUN apt-get update && apt-get install -y     nginx     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [4/9] COPY requirements.txt .
+#8 CACHED
+
+#9 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#9 3.757 Collecting Flask==2.3.3 (from -r requirements.txt (line 1))
+#9 4.347   Downloading flask-2.3.3-py3-none-any.whl.metadata (3.6 kB)
+#9 4.590 Collecting Flask-SQLAlchemy==3.0.5 (from -r requirements.txt (line 2))
+#9 4.769   Downloading flask_sqlalchemy-3.0.5-py3-none-any.whl.metadata (3.3 kB)
+#9 5.237 Collecting PyMySQL==1.1.0 (from -r requirements.txt (line 3))
+#9 5.421   Downloading PyMySQL-1.1.0-py3-none-any.whl.metadata (4.4 kB)
+#9 5.855 Collecting gunicorn==21.2.0 (from -r requirements.txt (line 4))
+#9 6.029   Downloading gunicorn-21.2.0-py3-none-any.whl.metadata (4.1 kB)
+#9 9.147 Collecting gevent==23.9.1 (from -r requirements.txt (line 5))
+#9 9.340   Downloading gevent-23.9.1.tar.gz (5.8 MB)
+#9 27.54      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.8/5.8 MB 362.9 kB/s  0:00:18
+#9 28.41   Installing build dependencies: started
+#9 54.04   Installing build dependencies: finished with status 'done'
+#9 54.04   Getting requirements to build wheel: started
+#9 59.26   Getting requirements to build wheel: finished with status 'error'
+#9 59.28   error: subprocess-exited-with-error
+#9 59.28   
+#9 59.28   × Getting requirements to build wheel did not run successfully.
+#9 59.28   │ exit code: 1
+#9 59.28   ╰─> [56 lines of output]
+#9 59.28       Compiling src/gevent/resolver/cares.pyx because it changed.
+#9 59.28       [1/1] Cythonizing src/gevent/resolver/cares.pyx
+#9 59.28       performance hint: src/gevent/libev/corecext.pyx:1357:0: Exception check on '_syserr_cb' will always require the GIL to be acquired.
+#9 59.28       Possible solutions:
+#9 59.28           1. Declare '_syserr_cb' as 'noexcept' if you control the definition and you're sure you don't want the function to raise exceptions.
+#9 59.28           2. Use an 'int' return type on '_syserr_cb' to allow an error code to be returned.
+#9 59.28       
+#9 59.28       Error compiling Cython file:
+#9 59.28       ------------------------------------------------------------
+#9 59.28       ...
+#9 59.28       cdef tuple integer_types
+#9 59.28       
+#9 59.28       if sys.version_info[0] >= 3:
+#9 59.28           integer_types = int,
+#9 59.28       else:
+#9 59.28           integer_types = (int, long)
+#9 59.28                                 ^
+#9 59.28       ------------------------------------------------------------
+#9 59.28       src/gevent/libev/corecext.pyx:69:26: undeclared name not builtin: long
+#9 59.28       Compiling src/gevent/libev/corecext.pyx because it changed.
+#9 59.28       [1/1] Cythonizing src/gevent/libev/corecext.pyx
+#9 59.28       Traceback (most recent call last):
+#9 59.28         File "/usr/local/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 389, in <module>
+#9 59.28           main()
+#9 59.28           ~~~~^^
+#9 59.28         File "/usr/local/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 373, in main
+#9 59.28           json_out["return_val"] = hook(**hook_input["kwargs"])
+#9 59.28                                    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+#9 59.28         File "/usr/local/lib/python3.13/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 143, in get_requires_for_build_wheel
+#9 59.28           return hook(config_settings)
+#9 59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 333, in get_requires_for_build_wheel
+#9 59.28           return self._get_build_requires(config_settings, requirements=[])
+#9 59.28                  ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#9 59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 301, in _get_build_requires
+#9 59.28           self.run_setup()
+#9 59.28           ~~~~~~~~~~~~~~^^
+#9 59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/setuptools/build_meta.py", line 317, in run_setup
+#9 59.28           exec(code, locals())
+#9 59.28           ~~~~^^^^^^^^^^^^^^^^
+#9 59.28         File "<string>", line 54, in <module>
+#9 59.28         File "/tmp/pip-install-gdntfwxo/gevent_94066ddcc221487b8074fa9e090e7ca5/_setuputils.py", line 249, in cythonize1
+#9 59.28           new_ext = cythonize(
+#9 59.28                     ~~~~~~~~~^
+#9 59.28               [ext],
+#9 59.28               ^^^^^^
+#9 59.28           ...<46 lines>...
+#9 59.28               # cache="build/cycache",
+#9 59.28               ^^^^^^^^^^^^^^^^^^^^^^^^
+#9 59.28           )[0]
+#9 59.28           ^
+#9 59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/Cython/Build/Dependencies.py", line 1153, in cythonize
+#9 59.28           cythonize_one(*args)
+#9 59.28           ~~~~~~~~~~~~~^^^^^^^
+#9 59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/Cython/Build/Dependencies.py", line 1297, in cythonize_one
+#9 59.28           raise CompileError(None, pyx_file)
+#9 59.28       Cython.Compiler.Errors.CompileError: src/gevent/libev/corecext.pyx
+#9 59.28       [end of output]
+#9 59.28   
+#9 59.28   note: This error originates from a subprocess, and is likely not a problem with pip.
+#9 60.07 
+#9 60.07 [notice] A new release of pip is available: 26.0.1 -> 26.1.1
+#9 60.07 [notice] To update, run: pip install --upgrade pip
+#9 60.07 ERROR: Failed to build 'gevent' when getting requirements to build wheel
+#9 ERROR: process "/bin/sh -c pip install --no-cache-dir -r requirements.txt" did not complete successfully: exit code: 1
+------
+ > [5/9] RUN pip install --no-cache-dir -r requirements.txt:
+59.28         File "/tmp/pip-build-env-0wuzi_jd/overlay/lib/python3.13/site-packages/Cython/Build/Dependencies.py", line 1297, in cythonize_one
+59.28           raise CompileError(None, pyx_file)
+59.28       Cython.Compiler.Errors.CompileError: src/gevent/libev/corecext.pyx
+59.28       [end of output]
+59.28   
+59.28   note: This error originates from a subprocess, and is likely not a problem with pip.
+60.07 
+60.07 [notice] A new release of pip is available: 26.0.1 -> 26.1.1
+60.07 [notice] To update, run: pip install --upgrade pip
+60.07 ERROR: Failed to build 'gevent' when getting requirements to build wheel
+------
+Dockerfile:11
+--------------------
+   9 |     
+  10 |     COPY requirements.txt .
+  11 | >>> RUN pip install --no-cache-dir -r requirements.txt
+  12 |     
+  13 |     # Copy aplikasi
+--------------------
+ERROR: failed to solve: process "/bin/sh -c pip install --no-cache-dir -r requirements.txt" did not complete successfully: exit code: 1
